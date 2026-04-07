@@ -401,8 +401,7 @@ with col_stats:
     d1, d2, d3 = st.columns(3)
     metric_with_p90(d1, "Total", stats["box_total"], mins)
     metric_with_p90(d2, "Successful", stats["box_success"], mins)
-    metric_with_p90(d3, "Unsuccessful", stats["box_unsuccess"], mins)
-    st.metric("Accuracy", f'{stats["box_accuracy_pct"]:.1f}%')
+    d3.metric("Accuracy", f'{stats["box_accuracy_pct"]:.1f}%')
 
 with col_right:
     st.subheader("Pass Map (click the start dot)")
