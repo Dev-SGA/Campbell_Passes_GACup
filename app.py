@@ -38,7 +38,7 @@ PROG_OWN_HALF_THRESHOLD = 30
 PROG_CROSS_HALF_THRESHOLD = 15
 PROG_OPP_HALF_THRESHOLD = 10
 
-# Cores ajustadas: sucesso mais claro, falha mais escura
+# Cores ajustadas
 COLOR_SUCCESS = "#B0B0B0"
 COLOR_FAIL = "#D45B5B"
 COLOR_PROGRESSIVE = "#2F80ED"
@@ -183,16 +183,17 @@ def compute_stats(df: pd.DataFrame) -> dict:
 
     key_passes = int(df["video"].apply(has_video_value).sum())
 
-    in_final_third = df["x_end"] >= FINAL_THIRD_LINE_X
-    final_third_total = int(in_final_third.sum())
-    final_third_success = int(
-        (in_final_third & df["type"].str.contains("WON", case=False)).sum()
+    # To the Final Third: passe começa FORA do terço final e termina DENTRO
+    to_final_third = (df["x_start"] < FINAL_THIRD_LINE_X) & (df["x_end"] >= FINAL_THIRD_LINE_X)
+    to_final_third_total = int(to_final_third.sum())
+    to_final_third_success = int(
+        (to_final_third & df["type"].str.contains("WON", case=False)).sum()
     )
-    final_third_unsuccess = int(
-        (in_final_third & df["type"].str.contains("LOST", case=False)).sum()
+    to_final_third_unsuccess = int(
+        (to_final_third & df["type"].str.contains("LOST", case=False)).sum()
     )
-    final_third_accuracy = (
-        (final_third_success / final_third_total * 100.0) if final_third_total else 0.0
+    to_final_third_accuracy = (
+        (to_final_third_success / to_final_third_total * 100.0) if to_final_third_total else 0.0
     )
 
     to_box = (
@@ -218,10 +219,10 @@ def compute_stats(df: pd.DataFrame) -> dict:
         "progressive_passes": progressive_total,
         "progressive_successful_passes": progressive_successful,
         "progressive_accuracy_pct": round(progressive_accuracy, 2),
-        "final_third_total": final_third_total,
-        "final_third_success": final_third_success,
-        "final_third_unsuccess": final_third_unsuccess,
-        "final_third_accuracy_pct": round(final_third_accuracy, 2),
+        "to_final_third_total": to_final_third_total,
+        "to_final_third_success": to_final_third_success,
+        "to_final_third_unsuccess": to_final_third_unsuccess,
+        "to_final_third_accuracy_pct": round(to_final_third_accuracy, 2),
         "box_total": box_total,
         "box_success": box_success,
         "box_unsuccess": box_unsuccess,
@@ -275,7 +276,7 @@ def draw_pass_map(df: pd.DataFrame, title: str):
             alpha = 0.82
         else:
             color = COLOR_SUCCESS
-            alpha = 0.80
+            alpha = 0.55
 
         pitch.arrows(
             row["x_start"], row["y_start"],
@@ -388,12 +389,12 @@ with col_stats:
 
     st.divider()
 
-    st.subheader("Final Third")
+    st.subheader("To the Final Third")
     c7, c8, c9 = st.columns(3)
-    metric_with_p90(c7, "Total", stats["final_third_total"], mins)
-    metric_with_p90(c8, "Successful", stats["final_third_success"], mins)
-    metric_with_p90(c9, "Unsuccessful", stats["final_third_unsuccess"], mins)
-    st.metric("Accuracy", f'{stats["final_third_accuracy_pct"]:.1f}%')
+    metric_with_p90(c7, "Total", stats["to_final_third_total"], mins)
+    metric_with_p90(c8, "Successful", stats["to_final_third_success"], mins)
+    metric_with_p90(c9, "Unsuccessful", stats["to_final_third_unsuccess"], mins)
+    st.metric("Accuracy", f'{stats["to_final_third_accuracy_pct"]:.1f}%')
 
     st.divider()
 
