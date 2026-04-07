@@ -19,10 +19,16 @@ st.set_page_config(layout="wide", page_title="Pass Map Dashboard (Interactive)")
 # ==========================
 # Configuration
 # ==========================
-MINUTES_PLAYED = 100
+# Minutagem por jogo
+MINUTES_BY_MATCH = {
+    "Vs Dallas": 24,
+    "Vs Nagoya": 32,
+    "Vs Busan Park": 7,
+    "Vs Atlanta": 63,
+}
+TOTAL_MINUTES = sum(MINUTES_BY_MATCH.values())  # 126
 
 st.title("Pass Map Dashboard")
-st.caption(f"⏱️ {MINUTES_PLAYED} minutes played — Click the start dot to select the pass event.")
 
 FINAL_THIRD_LINE_X = 80
 
@@ -138,6 +144,13 @@ def per90(value: int, minutes: int) -> str:
     if result == int(result):
         return f"{int(result)}"
     return f"{result:.1f}"
+
+
+def get_minutes_for_match(match_name: str) -> int:
+    """Retorna a minutagem correta: por jogo ou total para All Matches."""
+    if match_name == "All Matches":
+        return TOTAL_MINUTES
+    return MINUTES_BY_MATCH.get(match_name, 0)
 
 
 # ==========================
@@ -304,7 +317,7 @@ def draw_pass_map(df: pd.DataFrame, title: str):
         Line2D([0], [0], color=COLOR_SUCCESS, lw=2.5, label="Successful Pass"),
         Line2D([0], [0], color=COLOR_FAIL, lw=2.5, label="Unsuccessful Pass"),
         Line2D([0], [0], color=COLOR_PROGRESSIVE, lw=2.5,
-               label="Progressive Pass"),
+               label="Successful Progressive Pass (Opta)"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="gray",
                markeredgecolor="white", markersize=6, label="Start point (click)"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="gray",
@@ -364,7 +377,18 @@ elif pass_filter == "Progressive Only":
     ].reset_index(drop=True)
 
 stats = compute_stats(df)
-mins = MINUTES_PLAYED
+mins = get_minutes_for_match(selected_match)
+
+# ==========================
+# Caption com minutagem
+# ==========================
+if selected_match == "All Matches":
+    minutes_detail = " | ".join(
+        [f"{name}: {m}'" for name, m in MINUTES_BY_MATCH.items()]
+    )
+    st.caption(f"⏱️ {TOTAL_MINUTES} minutes played ({minutes_detail}) — Click the start dot to select the pass event.")
+else:
+    st.caption(f"⏱️ {mins} minutes played — Click the start dot to select the pass event.")
 
 # ==========================
 # Layout
@@ -393,7 +417,8 @@ with col_stats:
     c7, c8, c9 = st.columns(3)
     metric_with_p90(c7, "Total", stats["to_final_third_total"], mins)
     metric_with_p90(c8, "Successful", stats["to_final_third_success"], mins)
-    c9.metric("Accuracy", f'{stats["to_final_third_accuracy_pct"]:.1f}%')
+    metric_with_p90(c9, "Unsuccessful", stats["to_final_third_unsuccess"], mins)
+    st.metric("Accuracy", f'{stats["to_final_third_accuracy_pct"]:.1f}%')
 
     st.divider()
 
@@ -401,7 +426,8 @@ with col_stats:
     d1, d2, d3 = st.columns(3)
     metric_with_p90(d1, "Total", stats["box_total"], mins)
     metric_with_p90(d2, "Successful", stats["box_success"], mins)
-    d3.metric("Accuracy", f'{stats["box_accuracy_pct"]:.1f}%')
+    metric_with_p90(d3, "Unsuccessful", stats["box_unsuccess"], mins)
+    st.metric("Accuracy", f'{stats["box_accuracy_pct"]:.1f}%')
 
 with col_right:
     st.subheader("Pass Map (click the start dot)")
