@@ -393,7 +393,7 @@ with col_stats:
     c7, c8, c9 = st.columns(3)
     metric_with_p90(c7, "Total", stats["to_final_third_total"], mins)
     metric_with_p90(c8, "Successful", stats["to_final_third_success"], mins)
-    st.metric("Accuracy", f'{stats["to_final_third_accuracy_pct"]:.1f}%')
+    c9.metric("Accuracy", f'{stats["to_final_third_accuracy_pct"]:.1f}%')
 
     st.divider()
 
