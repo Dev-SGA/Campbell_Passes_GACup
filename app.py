@@ -304,7 +304,7 @@ def draw_pass_map(df: pd.DataFrame, title: str):
         Line2D([0], [0], color=COLOR_SUCCESS, lw=2.5, label="Successful Pass"),
         Line2D([0], [0], color=COLOR_FAIL, lw=2.5, label="Unsuccessful Pass"),
         Line2D([0], [0], color=COLOR_PROGRESSIVE, lw=2.5,
-               label="Successful Progressive Pass (Opta)"),
+               label="Progressive Pass"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="gray",
                markeredgecolor="white", markersize=6, label="Start point (click)"),
         Line2D([0], [0], marker="o", color="w", markerfacecolor="gray",
@@ -390,10 +390,9 @@ with col_stats:
     st.divider()
 
     st.subheader("To the Final Third")
-    c7, c8, c9 = st.columns(3)
+    c7, c8 = st.columns(3)
     metric_with_p90(c7, "Total", stats["to_final_third_total"], mins)
     metric_with_p90(c8, "Successful", stats["to_final_third_success"], mins)
-    metric_with_p90(c9, "Unsuccessful", stats["to_final_third_unsuccess"], mins)
     st.metric("Accuracy", f'{stats["to_final_third_accuracy_pct"]:.1f}%')
 
     st.divider()
