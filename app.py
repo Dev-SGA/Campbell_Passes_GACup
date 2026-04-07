@@ -33,12 +33,14 @@ BOX_Y_MAX = 62
 GOAL_X = 120
 GOAL_Y = 40
 
-PROG_OWN_HALF_THRESHOLD = 24
-PROG_CROSS_HALF_THRESHOLD = 12
-PROG_OPP_HALF_THRESHOLD = 8
+# Limiares oficiais Opta para passes progressivos
+PROG_OWN_HALF_THRESHOLD = 30
+PROG_CROSS_HALF_THRESHOLD = 15
+PROG_OPP_HALF_THRESHOLD = 10
 
-COLOR_SUCCESS = "#8E8E8E"
-COLOR_FAIL = "#F2A3A3"
+# Cores ajustadas: sucesso mais claro, falha mais escura
+COLOR_SUCCESS = "#B0B0B0"
+COLOR_FAIL = "#D45B5B"
 COLOR_PROGRESSIVE = "#2F80ED"
 
 # ==========================
@@ -267,13 +269,13 @@ def draw_pass_map(df: pd.DataFrame, title: str):
 
         if is_lost:
             color = COLOR_FAIL
-            alpha = 0.45
+            alpha = 0.55
         elif is_progressive_success:
             color = COLOR_PROGRESSIVE
             alpha = 0.82
         else:
             color = COLOR_SUCCESS
-            alpha = 0.75
+            alpha = 0.80
 
         pitch.arrows(
             row["x_start"], row["y_start"],
